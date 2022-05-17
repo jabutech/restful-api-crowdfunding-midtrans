@@ -51,6 +51,8 @@ func main() {
 	api.POST("/users", userHandler.RegisterUser)
 	// Endpoint login user
 	api.POST("/sessions", userHandler.Login)
+	// Endpoint email checkers
+	api.POST("/email-checkers", userHandler.CheckEmailAvailability)
 
 	// Run router
 	router.Run()

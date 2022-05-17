@@ -128,5 +128,61 @@ func (h *userHandler) Login(c *gin.Context) {
 
 	// send response json with status 200, and argument response fromat
 	c.JSON(http.StatusOK, response)
+}
 
+// Handle for check email
+func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
+	// Create var input with type struct CheckEmailInput
+	var input user.CheckEmailInput
+
+	// Get data json body and save to var input
+	err := c.ShouldBindJSON(&input)
+	// If error validation
+	if err != nil {
+		// Iteration error with helper format validation error
+		errors := helper.FormatValidationError(err)
+		// Create new map for handle error
+		errorMessage := gin.H{"errors": errors}
+
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Email Checking failed",
+			http.StatusUnprocessableEntity,
+			"error",
+			errorMessage, // handle format error from validation
+		)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// If no error validation, Check email is available on database
+	isEmailAvailable, err := h.userService.IsEmailAvailable(input)
+	// If error validation
+	if err != nil {
+		// Create new map for handle error
+		errorMessage := gin.H{"errors": "Server error"}
+
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Email checking failed",
+			http.StatusUnprocessableEntity,
+			"error",
+			errorMessage, // handle format error from validation
+		)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	data := gin.H{
+		"is_available": isEmailAvailable,
+	}
+
+	metaMessage := "Email has been registered"
+
+	if isEmailAvailable {
+		metaMessage = "Email is available"
+	}
+
+	response := helper.ApiResponse(metaMessage, http.StatusOK, "success", data)
+	c.JSON(http.StatusOK, response)
 }
