@@ -5,6 +5,7 @@ import "gorm.io/gorm"
 // Kontrak repository
 type Repository interface {
 	Save(user User) (User, error)
+	FindByEmail(email string) (User, error)
 }
 
 // Struct repository
@@ -27,5 +28,21 @@ func (r *repository) Save(user User) (User, error) {
 
 	// (3) If create user success, return user and error nil
 	return user, nil
+}
 
+// Function for find user by email
+func (r *repository) FindByEmail(email string) (User, error) {
+	// Create var user with type struct user
+	var user User
+
+	// Find from database
+	err := r.db.Where("email = ?", email).Find(&user).Error
+	// If error
+	if err != nil {
+		// return error
+		return user, err
+	}
+
+	// If success, return user
+	return user, nil
 }

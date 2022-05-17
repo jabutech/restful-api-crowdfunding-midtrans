@@ -7,3 +7,9 @@ type RegisterUserInput struct {
 	Email      string `json:"email" binding:"required,email"` // validation has been required and format must been email
 	Password   string `json:"password" binding:"required"`    // validation has been required
 }
+
+// Struct for map user input login
+type LoginInput struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
