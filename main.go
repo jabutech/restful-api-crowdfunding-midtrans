@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bwacroudfunding/auth"
 	"bwacroudfunding/handler"
 	"bwacroudfunding/user"
 	"log"
@@ -21,10 +22,14 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	// Call NewRepository and set argument db
+	// Repository
 	userRepository := user.NewRepository(db)
+	// Service
+	authService := auth.NewService()
 	userService := user.NewService(userRepository)
-	userHandler := handler.NewUserHandler(userService)
+
+	// Handler
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	// Create new router
 	router := gin.Default()
