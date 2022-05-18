@@ -235,8 +235,10 @@ func (h *userHandler) UploadAvatar(c *gin.Context) {
 		return
 	}
 
-	// Get user id from jwt
-	userID := 2
+	// Get currentUser login from context and export to struct User
+	currentUser := c.MustGet("currentUser").(user.User)
+	userID := currentUser.ID
+
 	// If no error, create path name
 	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
 	// Move image to folder
