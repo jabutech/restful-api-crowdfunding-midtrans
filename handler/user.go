@@ -3,6 +3,7 @@ package handler
 import (
 	"bwacroudfunding/helper"
 	"bwacroudfunding/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -185,4 +186,58 @@ func (h *userHandler) CheckEmailAvailability(c *gin.Context) {
 
 	response := helper.ApiResponse(metaMessage, http.StatusOK, "success", data)
 	c.JSON(http.StatusOK, response)
+}
+
+// Function handler for upload avatar
+func (h *userHandler) UploadAvatar(c *gin.Context) {
+	// Get payload with parameter "avatar"
+	file, err := c.FormFile("avatar")
+	// Check if error
+	if err != nil {
+		// Create new map data
+		data := gin.H{"is_uploaded": false}
+		// Create format response with helper ApiResponse
+		response := helper.ApiResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+		// Create response json
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Get user id from jwt
+	userID := 2
+	// If no error, create path name
+	path := fmt.Sprintf("images/%d-%s", userID, file.Filename)
+	// Move image to folder
+	err = c.SaveUploadedFile(file, path)
+	// Check if error
+	if err != nil {
+		// Create new map data
+		data := gin.H{"is_uploaded": false}
+		// Create format response with helper ApiResponse
+		response := helper.ApiResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+		// Create response json
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Save avatar with service SaveAvatar
+	_, err = h.userService.SaveAvatar(userID, path)
+	// Check if error
+	if err != nil {
+		// Create new map data
+		data := gin.H{"is_uploaded": false}
+		// Create format response with helper ApiResponse
+		response := helper.ApiResponse("Failed to upload avatar image", http.StatusBadRequest, "error", data)
+		// Create response json
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Create new map
+	data := gin.H{"is_uploaded": true}
+	// Create format response
+	response := helper.ApiResponse("Avatar successfuly uploaded", http.StatusOK, "success", data)
+	// Create response JSON
+	c.JSON(http.StatusOK, response)
+
 }
