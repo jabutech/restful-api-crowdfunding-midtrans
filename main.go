@@ -6,6 +6,7 @@ import (
 	"bwacroudfunding/handler"
 	"bwacroudfunding/helper"
 	"bwacroudfunding/user"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -34,6 +35,10 @@ func main() {
 	// Service
 	authService := auth.NewService()
 	userService := user.NewService(userRepository)
+	campaignService := campaign.NewService(campaignRepository)
+
+	campaigns, err := campaignService.FindCampaigns(2)
+	fmt.Println(len(campaigns))
 
 	// Handler
 	userHandler := handler.NewUserHandler(userService, authService)
