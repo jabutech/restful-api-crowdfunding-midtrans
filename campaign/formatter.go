@@ -8,6 +8,7 @@ type CampaignFormatter struct {
 	ImageURL         string `json:"image_url"`
 	GoalAmount       int    `json:"goal_amount"`
 	CurrentAmount    int    `json:"current_amount"`
+	Slug             string `json:"slug"`
 }
 
 // Function for convert struct for handle single data campaign to CampaignFormatter
@@ -19,6 +20,7 @@ func FormatCampaign(campaign Campaign) CampaignFormatter {
 	campaignFormatter.Name = campaign.Name
 	campaignFormatter.ShortDescription = campaign.ShortDescription
 	campaignFormatter.GoalAmount = campaign.GoalAmount
+	campaignFormatter.Slug = campaign.Slug
 	campaignFormatter.CurrentAmount = campaign.CurrentAmount
 
 	// Handle image
@@ -32,7 +34,8 @@ func FormatCampaign(campaign Campaign) CampaignFormatter {
 
 // Function for convert struct for handle multiple data campaign to CampaignFormatter
 func FormatCampaigns(campaigns []Campaign) []CampaignFormatter {
-	/* - Create a var campaignsFormatter with data type slice of struct CampaignFormatter (Symbol {} this means is default value `empty array`)
+	/* - Create a var campaignsFormatter
+	- with data type slice of struct CampaignFormatter (Note: Symbol {} this means is default value `empty array`)
 	- for accomodate multiple data campaign
 	*/
 	campaignsFormatter := []CampaignFormatter{}

@@ -42,6 +42,10 @@ func main() {
 
 	// Create new router
 	router := gin.Default()
+
+	// Router for handle static folder image
+	router.Static("/images", "./images")
+
 	// Create new group api version 1
 	api := router.Group("/api/v1")
 
