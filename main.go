@@ -6,7 +6,6 @@ import (
 	"bwacroudfunding/handler"
 	"bwacroudfunding/helper"
 	"bwacroudfunding/user"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -37,11 +36,9 @@ func main() {
 	userService := user.NewService(userRepository)
 	campaignService := campaign.NewService(campaignRepository)
 
-	campaigns, err := campaignService.FindCampaigns(2)
-	fmt.Println(len(campaigns))
-
 	// Handler
 	userHandler := handler.NewUserHandler(userService, authService)
+	campaignHandler := handler.NewCampaignHandler(campaignService)
 
 	// Create new router
 	router := gin.Default()
@@ -57,6 +54,9 @@ func main() {
 	api.POST("/email-checkers", userHandler.CheckEmailAvailability)
 	// Endpoint avatars
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
+
+	// Endpoint get campaign
+	api.GET("/campaigns", campaignHandler.GetCampaigns)
 
 	// Run router
 	router.Run()
