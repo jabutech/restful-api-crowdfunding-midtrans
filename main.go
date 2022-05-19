@@ -2,6 +2,7 @@ package main
 
 import (
 	"bwacroudfunding/auth"
+	"bwacroudfunding/campaign"
 	"bwacroudfunding/handler"
 	"bwacroudfunding/helper"
 	"bwacroudfunding/user"
@@ -28,6 +29,8 @@ func main() {
 
 	// Repository
 	userRepository := user.NewRepository(db)
+	campaignRepository := campaign.NewRepository(db)
+
 	// Service
 	authService := auth.NewService()
 	userService := user.NewService(userRepository)
