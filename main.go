@@ -61,6 +61,8 @@ func main() {
 
 	// Endpoint get campaign
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
+	// Endpoint get campaign by id
+	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
 
 	// Run router
 	router.Run()

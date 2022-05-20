@@ -1,6 +1,9 @@
 package campaign
 
-import "time"
+import (
+	"bwacroudfunding/user"
+	"time"
+)
 
 type Campaign struct {
 	ID               int
@@ -16,6 +19,7 @@ type Campaign struct {
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
 	CampaignImages   []CampaignImage // Get Image from relation to table campaign_images
+	User             user.User       // Get user from relation to table users
 }
 
 type CampaignImage struct {
