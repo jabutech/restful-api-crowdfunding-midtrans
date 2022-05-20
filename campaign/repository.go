@@ -8,6 +8,7 @@ type Repository interface {
 	FindByUserID(userID int) ([]Campaign, error)
 	FindByID(ID int) (Campaign, error)
 	Save(campaign Campaign) (Campaign, error)
+	Update(campaign Campaign) (Campaign, error)
 }
 
 type repository struct {
@@ -75,5 +76,18 @@ func (r *repository) Save(campaign Campaign) (Campaign, error) {
 	}
 
 	// (3) If create campaign success, return campaign and error nil
+	return campaign, nil
+}
+
+func (r *repository) Update(campaign Campaign) (Campaign, error) {
+	// Save update data to db
+	err := r.db.Save(&campaign).Error
+	// If error
+	if err != nil {
+		// return error
+		return campaign, err
+	}
+
+	// If success, return campaign
 	return campaign, nil
 }
