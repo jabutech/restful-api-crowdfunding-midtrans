@@ -3,6 +3,7 @@ package handler
 import (
 	"bwacroudfunding/campaign"
 	"bwacroudfunding/helper"
+	"bwacroudfunding/user"
 	"net/http"
 	"strconv"
 
@@ -68,5 +69,60 @@ func (h *campaignHandler) GetCampaign(c *gin.Context) {
 
 	// If no error, create format response
 	response := helper.ApiResponse("Campaign detail", http.StatusOK, "success", campaign.FormatCampaignDetail(campaignDetail))
+	c.JSON(http.StatusOK, response)
+}
+
+// Function for create campaign
+func (h *campaignHandler) CreateCampaign(c *gin.Context) {
+	// Create a var input with value campaign.CreateCampaignInput
+	var input campaign.CreateCampaignInput
+
+	// Get data payload
+	err := c.ShouldBindJSON(&input)
+	// If error validation
+	if err != nil {
+		// Iteration error with helper format validation error
+		errors := helper.FormatValidationError(err)
+		// Create new map for handle error
+		errorMessage := gin.H{"errors": errors}
+
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to create campaign",
+			http.StatusUnprocessableEntity,
+			"error",
+			errorMessage, // handle format error from validation
+		)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// Get data current user is logged in
+	currentUser := c.MustGet("currentUser").(user.User)
+	// Insert current user to property input.User
+	input.User = currentUser
+
+	// Create campaign
+	newCampaign, err := h.service.CreateCampaign(input)
+	// If error validation
+	if err != nil {
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to create campaign",
+			http.StatusBadRequest,
+			"error",
+			nil,
+		)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Create format response
+	response := helper.ApiResponse(
+		"Success to create campaign",
+		http.StatusOK,
+		"error",
+		campaign.FormatCampaign(newCampaign),
+	)
 	c.JSON(http.StatusOK, response)
 }

@@ -63,6 +63,8 @@ func main() {
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
 	// Endpoint get campaign by id
 	api.GET("/campaigns/:id", campaignHandler.GetCampaign)
+	// Endpoint Create campaign
+	api.POST("/campaigns", authMiddleware(authService, userService), campaignHandler.CreateCampaign)
 
 	// Run router
 	router.Run()
