@@ -4,6 +4,7 @@ import (
 	"bwacroudfunding/campaign"
 	"bwacroudfunding/helper"
 	"bwacroudfunding/user"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -183,5 +184,83 @@ func (h *campaignHandler) UpdateCampaign(c *gin.Context) {
 	// Create format response with helper ApiResponse
 	response := helper.ApiResponse("Success to update campaign", http.StatusOK, "success", campaign.FormatCampaign(updatedCampaign))
 	// Return response json
+	c.JSON(http.StatusOK, response)
+}
+
+// Function for handle upload image
+func (h *campaignHandler) UploadImage(c *gin.Context) {
+	var input campaign.CreateCampaignImageInput
+
+	// Get data payload
+	err := c.ShouldBind(&input)
+	// If error validation
+	if err != nil {
+		// Iteration error with helper format validation error
+		errors := helper.FormatValidationError(err)
+		// Create new map for handle error
+		errorMessage := gin.H{"errors": errors}
+
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to update campaign",
+			http.StatusUnprocessableEntity,
+			"error",
+			errorMessage, // handle format error from validation
+		)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// Get data current user is logged in
+	currentUser := c.MustGet("currentUser").(user.User)
+	// Insert current user to property inputData.User
+	input.User = currentUser
+
+	// Get file image
+	file, err := c.FormFile("file")
+	// Check if error
+	if err != nil {
+		// Create new map data
+		data := gin.H{"is_uploaded": false}
+		// Create format response with helper ApiResponse
+		response := helper.ApiResponse("Failed to upload campaign image", http.StatusBadRequest, "error", data)
+		// Create response json
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// If no error, create path name
+	path := fmt.Sprintf("image-campaigns/%d-%s", currentUser.ID, file.Filename)
+	// Move image to folder
+	err = c.SaveUploadedFile(file, path)
+	// Check if error
+	if err != nil {
+		// Create new map data
+		data := gin.H{"is_uploaded": false}
+		// Create format response with helper ApiResponse
+		response := helper.ApiResponse("Failed to upload campaign image", http.StatusBadRequest, "error", data)
+		// Create response json
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Save avatar with service SaveCampaignImage
+	_, err = h.service.SaveCampaignImage(input, path)
+	// Check if error
+	if err != nil {
+		// Create new map data
+		data := gin.H{"is_uploaded": false}
+		// Create format response with helper ApiResponse
+		response := helper.ApiResponse("Failed to upload campaign image", http.StatusBadRequest, "error", data)
+		// Create response json
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Create new map
+	data := gin.H{"is_uploaded": true}
+	// Create format response
+	response := helper.ApiResponse("Campaign image successfuly uploaded", http.StatusOK, "success", data)
+	// Create response JSON
 	c.JSON(http.StatusOK, response)
 }

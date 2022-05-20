@@ -9,6 +9,8 @@ type Repository interface {
 	FindByID(ID int) (Campaign, error)
 	Save(campaign Campaign) (Campaign, error)
 	Update(campaign Campaign) (Campaign, error)
+	CreateImage(campaignImage CampaignImage) (CampaignImage, error)
+	MarkAllImagesAsNonPrimary(campaignID int) (bool, error)
 }
 
 type repository struct {
@@ -90,4 +92,32 @@ func (r *repository) Update(campaign Campaign) (Campaign, error) {
 
 	// If success, return campaign
 	return campaign, nil
+}
+
+func (r *repository) CreateImage(campaignImage CampaignImage) (CampaignImage, error) {
+	// (1) Create new user on db with user data from request
+	err := r.db.Create(&campaignImage).Error
+	// (2) Check if error
+	if err != nil {
+		return campaignImage, err
+	}
+
+	// (3) If create campaign success, return campaign and error nil
+	return campaignImage, nil
+}
+
+func (r *repository) MarkAllImagesAsNonPrimary(campaignID int) (bool, error) {
+	/*
+	   - Update data table campaign_image is all column is_primary to `false`
+	   - With Query `UPDATE campaign_images SET is_primary = false WHERE campaign_id = :campaign_id`
+	*/
+	err := r.db.Model(&CampaignImage{}).Where("campaign_id = ?", campaignID).Update("is_primary", false).Error
+	// If error
+	if err != nil {
+		return false, err
+	}
+
+	// If succes, return true
+	return true, nil
+
 }
