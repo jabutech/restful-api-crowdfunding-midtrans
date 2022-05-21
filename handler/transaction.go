@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bwacroudfunding/helper"
+	"bwacroudfunding/payment"
 	"bwacroudfunding/transaction"
 	"bwacroudfunding/user"
 	"net/http"
@@ -10,11 +11,12 @@ import (
 )
 
 type transactionHandler struct {
-	service transaction.Service
+	service        transaction.Service
+	paymentService payment.Service
 }
 
-func NewTransactionHanlder(service transaction.Service) *transactionHandler {
-	return &transactionHandler{service}
+func NewTransactionHanlder(service transaction.Service, paymentService payment.Service) *transactionHandler {
+	return &transactionHandler{service, paymentService}
 }
 
 // Function for get data campaign transaction
@@ -127,4 +129,42 @@ func (h *transactionHandler) CreateTransaction(c *gin.Context) {
 		transaction.FormatTransaction(newTransaction),
 	)
 	c.JSON(http.StatusOK, response)
+}
+
+// Function for handle notification from midtrans
+func (h *transactionHandler) GetNotification(c *gin.Context) {
+	var input transaction.TransactonNotificationInput
+
+	// Get payload json
+	err := c.ShouldBindJSON(&input)
+	// If error validation
+	if err != nil {
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to  process notification",
+			http.StatusBadRequest,
+			"error",
+			nil,
+		)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Process payment
+	err = h.paymentService.ProcessPAyment(input)
+	// If error validation
+	if err != nil {
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to  process notification",
+			http.StatusBadRequest,
+			"error",
+			nil,
+		)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// If success return status 200
+	c.JSON(http.StatusOK, input)
 }
