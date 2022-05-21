@@ -68,6 +68,8 @@ func main() {
 	api.POST("/email-checkers", userHandler.CheckEmailAvailability)
 	// Endpoint avatars
 	api.POST("/avatars", authMiddleware(authService, userService), userHandler.UploadAvatar)
+	// Endpoint fetch curren user login
+	api.GET("/users/fetch", authMiddleware(authService, userService), userHandler.FetchUser)
 
 	// Endpoint get campaign
 	api.GET("/campaigns", campaignHandler.GetCampaigns)
