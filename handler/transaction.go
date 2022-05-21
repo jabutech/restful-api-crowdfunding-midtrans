@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bwacroudfunding/helper"
-	"bwacroudfunding/payment"
 	"bwacroudfunding/transaction"
 	"bwacroudfunding/user"
 	"net/http"
@@ -11,12 +10,11 @@ import (
 )
 
 type transactionHandler struct {
-	service        transaction.Service
-	paymentService payment.Service
+	service transaction.Service
 }
 
-func NewTransactionHanlder(service transaction.Service, paymentService payment.Service) *transactionHandler {
-	return &transactionHandler{service, paymentService}
+func NewTransactionHanlder(service transaction.Service) *transactionHandler {
+	return &transactionHandler{service}
 }
 
 // Function for get data campaign transaction
@@ -151,7 +149,7 @@ func (h *transactionHandler) GetNotification(c *gin.Context) {
 	}
 
 	// Process payment
-	err = h.paymentService.ProcessPAyment(input)
+	err = h.service.ProcessPayment(input)
 	// If error validation
 	if err != nil {
 		// Create format response with helper
