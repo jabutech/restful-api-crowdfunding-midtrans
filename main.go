@@ -5,6 +5,7 @@ import (
 	"bwacroudfunding/campaign"
 	"bwacroudfunding/handler"
 	"bwacroudfunding/helper"
+	"bwacroudfunding/payment"
 	"bwacroudfunding/transaction"
 	"bwacroudfunding/user"
 	"log"
@@ -37,7 +38,8 @@ func main() {
 	authService := auth.NewService()
 	userService := user.NewService(userRepository)
 	campaignService := campaign.NewService(campaignRepository)
-	transationService := transaction.NewService(transactionRepository, campaignRepository)
+	paymentService := payment.NewService()
+	transationService := transaction.NewService(transactionRepository, campaignRepository, paymentService)
 
 	// Handler
 	userHandler := handler.NewUserHandler(userService, authService)
@@ -78,6 +80,8 @@ func main() {
 	api.GET("/campaigns/:id/transaction", authMiddleware(authService, userService), transactionHandler.GetCampaignTransactions)
 	// Endpoint get transaction based on user id
 	api.GET("/transactions", authMiddleware(authService, userService), transactionHandler.GetUserTransaction)
+	// Endpoint create new transaction
+	api.POST("/transactions", authMiddleware(authService, userService), transactionHandler.CreateTransaction)
 
 	// Run router
 	router.Run()

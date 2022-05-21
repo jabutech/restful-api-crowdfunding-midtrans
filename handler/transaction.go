@@ -72,3 +72,59 @@ func (h *transactionHandler) GetUserTransaction(c *gin.Context) {
 	response := helper.ApiResponse("User's transaction", http.StatusOK, "success", transaction.FormatUserTransactions(transactions))
 	c.JSON(http.StatusOK, response)
 }
+
+// Function for create new data campaign transaction
+func (h *transactionHandler) CreateTransaction(c *gin.Context) {
+	var input transaction.CreateTransactionInput
+
+	// Get data payload json
+	err := c.ShouldBindJSON(&input)
+
+	// If error validation
+	if err != nil {
+		// Iteration error with helper format validation error
+		errors := helper.FormatValidationError(err)
+		// Create new map for handle error
+		errorMessage := gin.H{"errors": errors}
+
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to create transaction",
+			http.StatusUnprocessableEntity,
+			"error",
+			errorMessage, // handle format error from validation
+		)
+		c.JSON(http.StatusUnprocessableEntity, response)
+		return
+	}
+
+	// Get data current user is logged in
+	currentUser := c.MustGet("currentUser").(user.User)
+	// Insert current user to property inputData.User
+	input.User = currentUser
+
+	// Create transaction
+	newTransaction, err := h.service.CreateTransaction(input)
+
+	// If error validation
+	if err != nil {
+		// Create format response with helper
+		response := helper.ApiResponse(
+			"Failed to create transaction",
+			http.StatusBadRequest,
+			"error",
+			nil,
+		)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	// Create format response
+	response := helper.ApiResponse(
+		"Success to create transaction",
+		http.StatusOK,
+		"success",
+		transaction.FormatTransaction(newTransaction),
+	)
+	c.JSON(http.StatusOK, response)
+}
