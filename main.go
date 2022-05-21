@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -48,6 +49,9 @@ func main() {
 
 	// Create new router
 	router := gin.Default()
+
+	// Use cors
+	router.Use(cors.Default())
 
 	// Router for handle static folder image
 	router.Static("/images", "./images")
