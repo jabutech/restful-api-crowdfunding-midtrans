@@ -5,6 +5,7 @@ import (
 	"bwacroudfunding/campaign"
 	"bwacroudfunding/handler"
 	"bwacroudfunding/helper"
+	"bwacroudfunding/transaction"
 	"bwacroudfunding/user"
 	"log"
 	"net/http"
@@ -30,15 +31,18 @@ func main() {
 	// Repository
 	userRepository := user.NewRepository(db)
 	campaignRepository := campaign.NewRepository(db)
+	transactionRepository := transaction.NewRepository(db)
 
 	// Service
 	authService := auth.NewService()
 	userService := user.NewService(userRepository)
 	campaignService := campaign.NewService(campaignRepository)
+	transationService := transaction.NewService(transactionRepository, campaignRepository)
 
 	// Handler
 	userHandler := handler.NewUserHandler(userService, authService)
 	campaignHandler := handler.NewCampaignHandler(campaignService)
+	transactionHandler := handler.NewTransactionHanlder(transationService)
 
 	// Create new router
 	router := gin.Default()
@@ -69,6 +73,9 @@ func main() {
 	api.PUT("/campaigns/:id", authMiddleware(authService, userService), campaignHandler.UpdateCampaign)
 	// Endpoint upload image campaign
 	api.POST("/campaigns-images", authMiddleware(authService, userService), campaignHandler.UploadImage)
+
+	// Endpoint get transaction
+	api.GET("/campaigns/:id/transaction", authMiddleware(authService, userService), transactionHandler.GetCampaignTransactions)
 
 	// Run router
 	router.Run()
